@@ -11,6 +11,13 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import { Input } from "./ui/input";
 import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
@@ -54,7 +61,7 @@ export function PackerDetail() {
 
   const updateProduct = (
     index: number,
-    field: "packerRemarks",
+    field: "packerRemarks" | "packStatusReady",
     value: string
   ) => {
     const newProducts = [...products];
@@ -106,7 +113,8 @@ export function PackerDetail() {
             <TableRow>
               <TableHead className="">Product SKU</TableHead>
               <TableHead className=" w-[100px]">Quantity</TableHead>
-              <TableHead className=" w-[130px]">Availability</TableHead>
+              <TableHead className=" w-[140px]">Pick Status Ready</TableHead>
+              <TableHead className="w-[160px]">Pack Status Ready</TableHead>
               <TableHead className="">Picker's Remarks</TableHead>
               <TableHead className="">Your Remarks</TableHead>
             </TableRow>
@@ -119,11 +127,27 @@ export function PackerDetail() {
                 <TableCell className="">
                   <div className="flex">
                     <Badge
-                      variant={product.availability === "Yes" ? "default" : "destructive"}
+                      variant={product.pickStatusReady === "Yes" ? "default" : "destructive"}
                     >
-                      {product.availability || "N/A"}
+                      {product.pickStatusReady || "N/A"}
                     </Badge>
                   </div>
+                </TableCell>
+                <TableCell className="">
+                  <Select
+                    value={product.packStatusReady || ""}
+                    onValueChange={(value) =>
+                      updateProduct(index, "packStatusReady", value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </TableCell>
                 <TableCell className=" text-sm text-gray-600">
                   {product.pickerRemarks || "—"}

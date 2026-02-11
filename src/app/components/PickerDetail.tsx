@@ -11,6 +11,13 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import { Input } from "./ui/input";
 import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
@@ -54,7 +61,7 @@ export function PickerDetail() {
 
   const updateProduct = (
     index: number,
-    field: "pickerRemarks",
+    field: "pickerRemarks" | "pickStatusReady",
     value: string
   ) => {
     const newProducts = [...products];
@@ -101,6 +108,7 @@ export function PickerDetail() {
               <TableHead className="">Product SKU</TableHead>
               <TableHead className=" w-[120px]">Quantity</TableHead>
               <TableHead className=" w-[140px]">Availability</TableHead>
+              <TableHead className="w-[160px]">Pick Status Ready</TableHead>
               <TableHead className="">Planner's Remarks</TableHead>
               <TableHead className="">Your Remarks</TableHead>
             </TableRow>
@@ -118,6 +126,22 @@ export function PickerDetail() {
                       {product.availability || "N/A"}
                     </Badge>
                   </div>
+                </TableCell>
+                <TableCell className="">
+                  <Select
+                    value={product.pickStatusReady || ""}
+                    onValueChange={(value) =>
+                      updateProduct(index, "pickStatusReady", value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </TableCell>
                 <TableCell className=" text-sm text-gray-600">
                   {product.plannerRemarks || "—"}
