@@ -115,6 +115,67 @@ export function ShipperDetail() {
         </div>
       </div>
 
+      {expandedSkuIndex !== null && products[expandedSkuIndex] && (
+        <div className="bg-white rounded-lg shadow p-4 mb-4">
+          <h4 className="text-sm font-semibold text-gray-700 mb-3">SKU History — {products[expandedSkuIndex].sku}</h4>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h5 className="text-xs font-semibold text-gray-500 uppercase mb-1">Planner Stage</h5>
+              <div className="bg-gray-50 rounded border border-gray-200 p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs text-gray-500">Availability:</span>
+                  <Badge variant={products[expandedSkuIndex].availability === "Yes" ? "default" : "destructive"}>
+                    {products[expandedSkuIndex].availability || "N/A"}
+                  </Badge>
+                </div>
+                <div className="text-xs text-gray-500 mb-1">Remarks:</div>
+                <p className="text-sm text-gray-700">{products[expandedSkuIndex].plannerRemarks || "—"}</p>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-xs font-semibold text-gray-500 uppercase mb-1">Picker Stage</h5>
+              <div className="bg-gray-50 rounded border border-gray-200 p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs text-gray-500">Pick Status:</span>
+                  <Badge variant={products[expandedSkuIndex].pickStatusReady === "Yes" ? "default" : "destructive"}>
+                    {products[expandedSkuIndex].pickStatusReady || "N/A"}
+                  </Badge>
+                </div>
+                <div className="text-xs text-gray-500 mb-1">Remarks:</div>
+                <p className="text-sm text-gray-700">{products[expandedSkuIndex].pickerRemarks || "—"}</p>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-xs font-semibold text-gray-500 uppercase mb-1">Packer Stage</h5>
+              <div className="bg-gray-50 rounded border border-gray-200 p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs text-gray-500">Pack Status:</span>
+                  <Badge variant={products[expandedSkuIndex].packStatusReady === "Yes" ? "default" : "destructive"}>
+                    {products[expandedSkuIndex].packStatusReady || "N/A"}
+                  </Badge>
+                </div>
+                <div className="text-xs text-gray-500 mb-1">Remarks:</div>
+                <p className="text-sm text-gray-700">{products[expandedSkuIndex].packerRemarks || "—"}</p>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-xs font-semibold text-gray-500 uppercase mb-1">Timeline</h5>
+              <div className="bg-gray-50 rounded border border-gray-200 p-3">
+                <p className="text-sm text-gray-600">
+                  <span className="text-xs text-gray-500">Planner:</span> {formatTime(order.plannerStartTime)} — {formatTime(order.plannerEndTime)}
+                </p>
+                <p className="text-sm text-gray-600 mt-1">
+                  <span className="text-xs text-gray-500">Picker:</span> {formatTime(order.pickerStartTime)} — {formatTime(order.pickerEndTime)}
+                </p>
+                <p className="text-sm text-gray-600 mt-1">
+                  <span className="text-xs text-gray-500">Packer:</span> {formatTime(order.packerStartTime)} — {formatTime(order.packerEndTime)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-lg shadow p-6">
         <Table>
           <TableHeader>
@@ -129,122 +190,60 @@ export function ShipperDetail() {
           </TableHeader>
           <TableBody>
             {products.map((product, index) => (
-              <>
-                <TableRow key={product.sku} className="cursor-pointer hover:bg-gray-50" onClick={() => toggleSkuDetail(index)}>
-                  <TableCell className="font-medium">
-                    <span className="inline-flex items-center gap-1">
-                      {expandedSkuIndex === index ? (
-                        <ChevronUp className="w-4 h-4 text-gray-400" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4 text-gray-400" />
-                      )}
-                      {product.sku}
-                    </span>
-                  </TableCell>
-                  <TableCell>{product.quantity}</TableCell>
-                  <TableCell>
-                    <div className="flex">
-                      <Badge
-                        variant={product.packStatusReady === "Yes" ? "default" : "destructive"}
-                      >
-                        {product.packStatusReady || "N/A"}
-                      </Badge>
-                    </div>
-                  </TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    <Select
-                      value={product.shipStatus || ""}
-                      onValueChange={(value) =>
-                        updateProduct(index, "shipStatus", value)
-                      }
+              <TableRow
+                key={product.sku}
+                className={`cursor-pointer hover:bg-gray-50 ${expandedSkuIndex === index ? "bg-emerald-50" : ""}`}
+                onClick={() => toggleSkuDetail(index)}
+              >
+                <TableCell className="font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    {expandedSkuIndex === index ? (
+                      <ChevronUp className="w-4 h-4 text-gray-400" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                    )}
+                    {product.sku}
+                  </span>
+                </TableCell>
+                <TableCell>{product.quantity}</TableCell>
+                <TableCell>
+                  <div className="flex">
+                    <Badge
+                      variant={product.packStatusReady === "Yes" ? "default" : "destructive"}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Yes">Yes</SelectItem>
-                        <SelectItem value="No">No</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell className="text-sm text-gray-600">
-                    {product.packerRemarks || "—"}
-                  </TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    <Input
-                      placeholder="Enter remarks..."
-                      value={product.shipperRemarks || ""}
-                      onChange={(e) =>
-                        updateProduct(index, "shipperRemarks", e.target.value)
-                      }
-                    />
-                  </TableCell>
-                </TableRow>
-                {expandedSkuIndex === index && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="bg-gray-50 p-0">
-                      <div className="p-4 border-t border-gray-200">
-                        <h4 className="text-sm font-semibold text-gray-700 mb-3">SKU History — {product.sku}</h4>
-                        <div className="grid grid-cols-2 gap-4 mb-3">
-                          <div>
-                            <h5 className="text-xs font-semibold text-gray-500 uppercase mb-1">Planner Stage</h5>
-                            <div className="bg-white rounded border border-gray-200 p-3">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-xs text-gray-500">Availability:</span>
-                                <Badge variant={product.availability === "Yes" ? "default" : "destructive"}>
-                                  {product.availability || "N/A"}
-                                </Badge>
-                              </div>
-                              <div className="text-xs text-gray-500 mb-1">Remarks:</div>
-                              <p className="text-sm text-gray-700">{product.plannerRemarks || "—"}</p>
-                            </div>
-                          </div>
-                          <div>
-                            <h5 className="text-xs font-semibold text-gray-500 uppercase mb-1">Picker Stage</h5>
-                            <div className="bg-white rounded border border-gray-200 p-3">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-xs text-gray-500">Pick Status:</span>
-                                <Badge variant={product.pickStatusReady === "Yes" ? "default" : "destructive"}>
-                                  {product.pickStatusReady || "N/A"}
-                                </Badge>
-                              </div>
-                              <div className="text-xs text-gray-500 mb-1">Remarks:</div>
-                              <p className="text-sm text-gray-700">{product.pickerRemarks || "—"}</p>
-                            </div>
-                          </div>
-                          <div>
-                            <h5 className="text-xs font-semibold text-gray-500 uppercase mb-1">Packer Stage</h5>
-                            <div className="bg-white rounded border border-gray-200 p-3">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-xs text-gray-500">Pack Status:</span>
-                                <Badge variant={product.packStatusReady === "Yes" ? "default" : "destructive"}>
-                                  {product.packStatusReady || "N/A"}
-                                </Badge>
-                              </div>
-                              <div className="text-xs text-gray-500 mb-1">Remarks:</div>
-                              <p className="text-sm text-gray-700">{product.packerRemarks || "—"}</p>
-                            </div>
-                          </div>
-                          <div>
-                            <h5 className="text-xs font-semibold text-gray-500 uppercase mb-1">Timeline</h5>
-                            <div className="bg-white rounded border border-gray-200 p-3">
-                              <p className="text-sm text-gray-600">
-                                <span className="text-xs text-gray-500">Planner:</span> {formatTime(order.plannerStartTime)} — {formatTime(order.plannerEndTime)}
-                              </p>
-                              <p className="text-sm text-gray-600 mt-1">
-                                <span className="text-xs text-gray-500">Picker:</span> {formatTime(order.pickerStartTime)} — {formatTime(order.pickerEndTime)}
-                              </p>
-                              <p className="text-sm text-gray-600 mt-1">
-                                <span className="text-xs text-gray-500">Packer:</span> {formatTime(order.packerStartTime)} — {formatTime(order.packerEndTime)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </>
+                      {product.packStatusReady || "N/A"}
+                    </Badge>
+                  </div>
+                </TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <Select
+                    value={product.shipStatus || ""}
+                    onValueChange={(value) =>
+                      updateProduct(index, "shipStatus", value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </TableCell>
+                <TableCell className="text-sm text-gray-600">
+                  {product.packerRemarks || "—"}
+                </TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <Input
+                    placeholder="Enter remarks..."
+                    value={product.shipperRemarks || ""}
+                    onChange={(e) =>
+                      updateProduct(index, "shipperRemarks", e.target.value)
+                    }
+                  />
+                </TableCell>
+              </TableRow>
             ))}
           </TableBody>
         </Table>

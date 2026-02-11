@@ -93,6 +93,29 @@ export function PlannerDetail() {
         </div>
       </div>
 
+      {expandedSkuIndex !== null && products[expandedSkuIndex] && (
+        <div className="bg-white rounded-lg shadow p-4 mb-4">
+          <h4 className="text-sm font-semibold text-gray-700 mb-3">SKU Details — {products[expandedSkuIndex].sku}</h4>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <h4 className="text-sm font-semibold text-gray-700 mb-1">SKU</h4>
+              <p className="text-sm text-gray-600">{products[expandedSkuIndex].sku}</p>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-gray-700 mb-1">Quantity Ordered</h4>
+              <p className="text-sm text-gray-600">{products[expandedSkuIndex].quantity} units</p>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-gray-700 mb-1">Current Stage</h4>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                Planning
+              </span>
+            </div>
+          </div>
+          <p className="text-xs text-gray-400 mt-3 italic">This is the first stage — no previous history available.</p>
+        </div>
+      )}
+
       <div className="bg-white rounded-lg shadow p-6">
         <Table>
           <TableHeader>
@@ -105,71 +128,48 @@ export function PlannerDetail() {
           </TableHeader>
           <TableBody>
             {products.map((product, index) => (
-              <>
-                <TableRow key={product.sku} className="cursor-pointer hover:bg-gray-50" onClick={() => toggleSkuDetail(index)}>
-                  <TableCell className="font-medium">
-                    <span className="inline-flex items-center gap-1">
-                      {expandedSkuIndex === index ? (
-                        <ChevronUp className="w-4 h-4 text-gray-400" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4 text-gray-400" />
-                      )}
-                      {product.sku}
-                    </span>
-                  </TableCell>
-                  <TableCell>{product.quantity}</TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    <Select
-                      value={product.availability || ""}
-                      onValueChange={(value) =>
-                        updateProduct(index, "availability", value)
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Yes">Yes</SelectItem>
-                        <SelectItem value="No">No</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    <Input
-                      placeholder="Enter remarks..."
-                      value={product.plannerRemarks || ""}
-                      onChange={(e) =>
-                        updateProduct(index, "plannerRemarks", e.target.value)
-                      }
-                    />
-                  </TableCell>
-                </TableRow>
-                {expandedSkuIndex === index && (
-                  <TableRow>
-                    <TableCell colSpan={4} className="bg-gray-50 p-0">
-                      <div className="p-4 border-t border-gray-200">
-                        <div className="grid grid-cols-3 gap-4">
-                          <div>
-                            <h4 className="text-sm font-semibold text-gray-700 mb-1">SKU</h4>
-                            <p className="text-sm text-gray-600">{product.sku}</p>
-                          </div>
-                          <div>
-                            <h4 className="text-sm font-semibold text-gray-700 mb-1">Quantity Ordered</h4>
-                            <p className="text-sm text-gray-600">{product.quantity} units</p>
-                          </div>
-                          <div>
-                            <h4 className="text-sm font-semibold text-gray-700 mb-1">Current Stage</h4>
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                              Planning
-                            </span>
-                          </div>
-                        </div>
-                        <p className="text-xs text-gray-400 mt-3 italic">This is the first stage — no previous history available.</p>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </>
+              <TableRow
+                key={product.sku}
+                className={`cursor-pointer hover:bg-gray-50 ${expandedSkuIndex === index ? "bg-emerald-50" : ""}`}
+                onClick={() => toggleSkuDetail(index)}
+              >
+                <TableCell className="font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    {expandedSkuIndex === index ? (
+                      <ChevronUp className="w-4 h-4 text-gray-400" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                    )}
+                    {product.sku}
+                  </span>
+                </TableCell>
+                <TableCell>{product.quantity}</TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <Select
+                    value={product.availability || ""}
+                    onValueChange={(value) =>
+                      updateProduct(index, "availability", value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <Input
+                    placeholder="Enter remarks..."
+                    value={product.plannerRemarks || ""}
+                    onChange={(e) =>
+                      updateProduct(index, "plannerRemarks", e.target.value)
+                    }
+                  />
+                </TableCell>
+              </TableRow>
             ))}
           </TableBody>
         </Table>
