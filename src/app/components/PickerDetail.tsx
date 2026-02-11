@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Input } from "./ui/input";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import { formatTime } from "../formatTime";
 
@@ -30,6 +30,7 @@ export function PickerDetail() {
   const order = getOrder(id!);
 
   const [products, setProducts] = useState(order?.products || []);
+  const [expandedSkuIndex, setExpandedSkuIndex] = useState<number | null>(null);
   useEffect(() => {
     if (order) {
       setProducts(order.products);
@@ -69,6 +70,10 @@ export function PickerDetail() {
     setProducts(newProducts);
   };
 
+  const toggleSkuDetail = (index: number) => {
+    setExpandedSkuIndex(expandedSkuIndex === index ? null : index);
+  };
+
   const availableCount = products.filter(p => p.availability === "Yes").length;
 
   return (
@@ -93,8 +98,8 @@ export function PickerDetail() {
               <em>Note: This is dummy information until real AI integration is implemented.</em>
               <br />
               <br />
-              <strong>Previous Stage (Planner):</strong> Availability check completed on {formatTime(order.plannerEndTime)}. 
-              {availableCount} out of {products.length} SKUs are available in stock. 
+              <strong>Previous Stage (Planner):</strong> Availability check completed on {formatTime(order.plannerEndTime)}.
+              {availableCount} out of {products.length} SKUs are available in stock.
               Please proceed with picking the available items and update the pick status for each SKU. Items marked as unavailable should be noted in remarks.
             </p>
           </div>
@@ -115,47 +120,93 @@ export function PickerDetail() {
           </TableHeader>
           <TableBody>
             {products.map((product, index) => (
-              <TableRow key={product.sku}>
-                <TableCell className=" font-medium">{product.sku}</TableCell>
-                <TableCell className="">{product.quantity}</TableCell>
-                <TableCell className="">
-                  <div className="flex">
-                    <Badge
-                      variant={product.availability === "Yes" ? "default" : "destructive"}
+              <>
+                <TableRow key={product.sku} className="cursor-pointer hover:bg-gray-50" onClick={() => toggleSkuDetail(index)}>
+                  <TableCell className="font-medium">
+                    <span className="inline-flex items-center gap-1">
+                      {expandedSkuIndex === index ? (
+                        <ChevronUp className="w-4 h-4 text-gray-400" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                      )}
+                      {product.sku}
+                    </span>
+                  </TableCell>
+                  <TableCell>{product.quantity}</TableCell>
+                  <TableCell>
+                    <div className="flex">
+                      <Badge
+                        variant={product.availability === "Yes" ? "default" : "destructive"}
+                      >
+                        {product.availability || "N/A"}
+                      </Badge>
+                    </div>
+                  </TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <Select
+                      value={product.pickStatusReady || ""}
+                      onValueChange={(value) =>
+                        updateProduct(index, "pickStatusReady", value)
+                      }
                     >
-                      {product.availability || "N/A"}
-                    </Badge>
-                  </div>
-                </TableCell>
-                <TableCell className="">
-                  <Select
-                    value={product.pickStatusReady || ""}
-                    onValueChange={(value) =>
-                      updateProduct(index, "pickStatusReady", value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Yes">Yes</SelectItem>
-                      <SelectItem value="No">No</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </TableCell>
-                <TableCell className=" text-sm text-gray-600">
-                  {product.plannerRemarks || "—"}
-                </TableCell>
-                <TableCell className="">
-                  <Input
-                    placeholder="Enter remarks..."
-                    value={product.pickerRemarks || ""}
-                    onChange={(e) =>
-                      updateProduct(index, "pickerRemarks", e.target.value)
-                    }
-                  />
-                </TableCell>
-              </TableRow>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Yes">Yes</SelectItem>
+                        <SelectItem value="No">No</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell className="text-sm text-gray-600">
+                    {product.plannerRemarks || "—"}
+                  </TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <Input
+                      placeholder="Enter remarks..."
+                      value={product.pickerRemarks || ""}
+                      onChange={(e) =>
+                        updateProduct(index, "pickerRemarks", e.target.value)
+                      }
+                    />
+                  </TableCell>
+                </TableRow>
+                {expandedSkuIndex === index && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="bg-gray-50 p-0">
+                      <div className="p-4 border-t border-gray-200">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-3">SKU History — {product.sku}</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <h5 className="text-xs font-semibold text-gray-500 uppercase mb-1">Planner Stage</h5>
+                            <div className="bg-white rounded border border-gray-200 p-3">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-xs text-gray-500">Availability:</span>
+                                <Badge variant={product.availability === "Yes" ? "default" : "destructive"}>
+                                  {product.availability || "N/A"}
+                                </Badge>
+                              </div>
+                              <div className="text-xs text-gray-500 mb-1">Remarks:</div>
+                              <p className="text-sm text-gray-700">{product.plannerRemarks || "—"}</p>
+                            </div>
+                          </div>
+                          <div>
+                            <h5 className="text-xs font-semibold text-gray-500 uppercase mb-1">Timeline</h5>
+                            <div className="bg-white rounded border border-gray-200 p-3">
+                              <p className="text-sm text-gray-600">
+                                <span className="text-xs text-gray-500">Planner Start:</span> {formatTime(order.plannerStartTime)}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                <span className="text-xs text-gray-500">Planner End:</span> {formatTime(order.plannerEndTime)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
             ))}
           </TableBody>
         </Table>
